@@ -15,9 +15,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import pers.mekomimi.bookvault.db.AppDatabase
-import pers.mekomimi.bookvault.db.scanBooks
-import pers.mekomimi.bookvault.ui.ShelfScreen
+import pers.mekomimi.bookvault.db.books.AppDatabase
+import pers.mekomimi.bookvault.db.books.scanBooks
+import pers.mekomimi.bookvault.ui.screen.ShelfScreen
 import java.io.File
 
 class MainActivity : ComponentActivity() {

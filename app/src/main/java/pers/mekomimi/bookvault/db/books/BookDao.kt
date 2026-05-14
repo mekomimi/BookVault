@@ -1,4 +1,4 @@
-package pers.mekomimi.bookvault.db
+package pers.mekomimi.bookvault.db.books
 
 import androidx.room.Dao
 import androidx.room.Insert

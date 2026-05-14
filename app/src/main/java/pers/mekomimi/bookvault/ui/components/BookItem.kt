@@ -3,14 +3,13 @@ package pers.mekomimi.bookvault.ui.components
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.FileProvider
-import pers.mekomimi.bookvault.db.Book
+import pers.mekomimi.bookvault.db.books.Book
 import java.io.File
 
 @Composable

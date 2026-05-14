@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import pers.mekomimi.bookvault.db.Book
+import pers.mekomimi.bookvault.db.books.Book
 
 
 @Composable

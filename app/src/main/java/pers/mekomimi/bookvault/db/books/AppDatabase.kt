@@ -1,4 +1,4 @@
-package pers.mekomimi.bookvault.db
+package pers.mekomimi.bookvault.db.books
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
