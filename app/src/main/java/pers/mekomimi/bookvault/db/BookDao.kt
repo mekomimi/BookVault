@@ -17,4 +17,7 @@ interface BookDao {
 
     @Query("DELETE FROM books")
     suspend fun clear()
+
+    @Query("SELECT COUNT(*) FROM books")
+    suspend fun count(): Int
 }
