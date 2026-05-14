@@ -7,6 +7,9 @@ import android.os.Environment
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
@@ -15,10 +18,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import pers.mekomimi.bookvault.db.books.AppDatabase
-import pers.mekomimi.bookvault.db.books.scanBooks
+import pers.mekomimi.bookvault.db.AppDatabase
+import pers.mekomimi.bookvault.db.folder.FolderManager
+import pers.mekomimi.bookvault.db.folder.FolderScanner
 import pers.mekomimi.bookvault.ui.screen.ShelfScreen
-import java.io.File
+import android.view.KeyEvent
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,19 +45,46 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             AppDatabase::class.java,
             "bookvault-db"
-        ).build()
-        val dao = db.bookDao()
+        ).fallbackToDestructiveMigration().build()
+        val bookDao = db.bookDao()
 
+        val folderManager = FolderManager(
+            this,
+            db
+        )
+
+        //选择扫描文件夹
+        val picker = registerForActivityResult(
+            ActivityResultContracts.OpenDocumentTree()
+        ) { uri ->
+            if (uri != null) {
+                lifecycleScope.launch {
+                    folderManager.addFolder(uri)
+                    //folderManager.scanAllFolders()
+                }
+            }
+        }
+        picker.launch(null)
+
+        //启动文件扫描
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            val hasBooks = bookDao.count() > 0
+//            if (!hasBooks) {
+//                scanBooks(File("/storage/emulated/0/Download"), bookDao)
+//            }
+//        }
+
+        val scanner = FolderScanner(this, db)
         lifecycleScope.launch(Dispatchers.IO) {
-            val hasBooks = dao.count() > 0
+            val hasBooks = bookDao.count() > 0
             if (!hasBooks) {
-                scanBooks(File("/storage/emulated/0/Download"), dao)
+                scanner.scanAllFolders()
             }
         }
 
         //UI设置
         setContent {
-            val books by dao.getAll().collectAsState(initial = null)
+            val books by bookDao.getAll().collectAsState(initial = null)
             val context = LocalContext.current
 
             when {
@@ -62,14 +94,43 @@ class MainActivity : ComponentActivity() {
 
                 else -> ShelfScreen(
                     books = books!!,
-                    dao = dao,
+                    dao = bookDao,
                     context = context
                 )
             }
         }
     }
+
+    var onVolumeDown: (() -> Unit)? = null
+    var onVolumeUp: (() -> Unit)? = null
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+
+        when (keyCode) {
+
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                onVolumeDown?.invoke()
+                return true
+            }
+
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                onVolumeUp?.invoke()
+                return true
+            }
+        }
+
+        return super.onKeyDown(keyCode, event)
+    }
 }
 
-annotation class EmptyScreen
+@Composable
+fun EmptyScreen() {
+    Text("没有书籍")
+}
 
-annotation class LoadingScreen
+@Composable
+fun LoadingScreen() {
+    Text("加载中")
+}
+
+

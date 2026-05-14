@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import pers.mekomimi.bookvault.MainActivity
 import pers.mekomimi.bookvault.db.books.Book
 import pers.mekomimi.bookvault.db.books.BookDao
 import pers.mekomimi.bookvault.db.books.scanBooks
@@ -37,7 +39,24 @@ fun ShelfScreen(
         .drop((currentPage - 1) * pageSize)
         .take(pageSize)
 
-    Column {
+    val activity = context as MainActivity
+
+    LaunchedEffect(Unit) {
+
+        activity.onVolumeDown = {
+            if (currentPage < totalPages) {
+                currentPage++
+            }
+        }
+
+        activity.onVolumeUp = {
+            if (currentPage > 1) {
+                currentPage--
+            }
+        }
+    }
+
+    Column{
         val controllerHeight = 80.dp
 
         BoxWithConstraints {
@@ -61,6 +80,7 @@ fun ShelfScreen(
                     scanBooks(File("/storage/emulated/0/Download"), dao)
                 }
             },
+
             modifier = Modifier.height(controllerHeight)
         )
     }

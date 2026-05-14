@@ -18,7 +18,7 @@ fun ShelfGrid(
         if (!books.isEmpty()){
             ShelfLayout {
                 repeat(9) { index ->
-                    BookItem(context = context, book = books[index])
+                    if(index < books.size) BookItem(context = context, book = books[index])
                 }
             }
         }

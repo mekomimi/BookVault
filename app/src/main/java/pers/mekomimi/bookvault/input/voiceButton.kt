@@ -8,10 +8,6 @@ enum class ReaderAction {
     PREV_PAGE
 }
 
-data class ReaderState(
-    val currentPage: Int = 0
-)
-
 object KeyMapper {
 
     fun map(key: Key): ReaderAction? {
@@ -27,27 +23,29 @@ object KeyMapper {
     }
 }
 
-class ReaderController {
+object ReaderController {
 
-    fun dispatch(action: ReaderAction) {
+
+    fun dispatch(
+        key: Key,
+        currentPage: Int,
+        onPageChange: (Int) -> Unit
+    ) {
+        val action = KeyMapper.map(key)
 
         when (action) {
 
             ReaderAction.NEXT_PAGE -> {
-                nextPage()
+                onPageChange(currentPage + 1)
             }
 
             ReaderAction.PREV_PAGE -> {
-                prevPage()
+                if (currentPage > 1) {
+                    onPageChange(currentPage - 1)
+                }
             }
+
+            else -> {}
         }
-    }
-
-    private fun prevPage() {
-        TODO("Not yet implemented")
-    }
-
-    private fun nextPage() {
-        TODO("Not yet implemented")
     }
 }

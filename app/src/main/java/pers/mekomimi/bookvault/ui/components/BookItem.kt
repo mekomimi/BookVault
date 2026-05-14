@@ -28,7 +28,7 @@ fun BookItem(
         )
 
         Button(onClick = {
-            val file = File(book.path)
+            val file = File(book.uri)
             val uri = FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.provider",

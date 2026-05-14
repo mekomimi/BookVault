@@ -1,10 +1,11 @@
-package pers.mekomimi.bookvault.db.folds
+package pers.mekomimi.bookvault.db.folder
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
+import pers.mekomimi.bookvault.db.AppDatabase
 
 class FolderManager(
     private val context: Context,
@@ -20,7 +21,7 @@ class FolderManager(
             )
 
         db.folderDao().insert(
-            FolderEntity(
+            Folder(
                 uri = uri.toString()
             )
         )

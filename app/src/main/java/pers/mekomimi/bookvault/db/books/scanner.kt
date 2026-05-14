@@ -16,7 +16,7 @@ suspend fun scanBooks(root: File, dao: BookDao) {
             println("命中书籍: ${file.absolutePath}")
 
             val book = Book(
-                path = file.absolutePath,
+                uri = file.absolutePath,
                 title = file.nameWithoutExtension,
                 ext = file.extension,
                 mtime = file.lastModified()

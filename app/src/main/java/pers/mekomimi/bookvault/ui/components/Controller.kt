@@ -36,11 +36,21 @@ fun Controller(
             }
         }
 
-        //refresh
-        Button(
-            onClick = onRefresh
-        ) {
-            Text("刷新列表")
+        Row{
+            //refresh
+            Button(
+                onClick = onRefresh
+            ) {
+                Text("刷新列表")
+            }
+
+            //添加文件夹
+            Button(
+                onClick = onRefresh
+            ) {
+                Text("添加文件夹")
+            }
         }
+
     }
 }
