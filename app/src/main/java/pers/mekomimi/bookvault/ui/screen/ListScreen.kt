@@ -66,7 +66,8 @@ fun BookScreen(
                 onPrev = onPrev,
                 onNext = onNext,
                 onRefresh = onRefresh,
-                modifier = Modifier.height(controllerHeight)
+                onRefresh,
+                modifier = Modifier.height(controllerHeight),
             )
         }
     }
@@ -109,7 +110,9 @@ fun ListScreen(
                     scanBooks(File("/storage/emulated/0/Download"), dao)
                 }
             },
-            modifier = Modifier.height(controllerHeight)
+            //TODO
+            onAddFolder = { },
+            modifier = Modifier.height(controllerHeight),
         )
     }
 }

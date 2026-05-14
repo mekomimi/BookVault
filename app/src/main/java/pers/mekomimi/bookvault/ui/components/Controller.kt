@@ -14,6 +14,7 @@ fun Controller(
     onPrev: () -> Unit,
     onNext: () -> Unit,
     onRefresh: () -> Unit,
+    onAddFolder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -46,7 +47,7 @@ fun Controller(
 
             //添加文件夹
             Button(
-                onClick = onRefresh
+                onClick = onAddFolder
             ) {
                 Text("添加文件夹")
             }

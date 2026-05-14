@@ -13,24 +13,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pers.mekomimi.bookvault.MainActivity
 import pers.mekomimi.bookvault.db.books.Book
-import pers.mekomimi.bookvault.db.books.BookDao
-import pers.mekomimi.bookvault.db.books.scanBooks
 import pers.mekomimi.bookvault.ui.components.Controller
 import pers.mekomimi.bookvault.ui.components.ShelfGrid
-import java.io.File
 
 @Composable
 fun ShelfScreen(
     books: List<Book>,
-    dao: BookDao,
+    onRefresh: () -> Unit,
+    onAddFolder: () -> Unit,
     context: Context
-) {
-    val scope = rememberCoroutineScope()
 
+) {
     //page state
     val pageSize = 9
     var currentPage by remember { mutableIntStateOf(1) }
@@ -56,7 +52,7 @@ fun ShelfScreen(
         }
     }
 
-    Column{
+    Column {
         val controllerHeight = 80.dp
 
         BoxWithConstraints {
@@ -75,12 +71,8 @@ fun ShelfScreen(
             totalPages,
             onPrev = { if (currentPage > 1) currentPage-- },
             onNext = { if (currentPage < totalPages) currentPage++ },
-            onRefresh = {
-                scope.launch(Dispatchers.IO) {
-                    scanBooks(File("/storage/emulated/0/Download"), dao)
-                }
-            },
-
+            onRefresh = onRefresh,
+            onAddFolder = onAddFolder,
             modifier = Modifier.height(controllerHeight)
         )
     }

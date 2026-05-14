@@ -8,8 +8,6 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +21,8 @@ import pers.mekomimi.bookvault.db.folder.FolderManager
 import pers.mekomimi.bookvault.db.folder.FolderScanner
 import pers.mekomimi.bookvault.ui.screen.ShelfScreen
 import android.view.KeyEvent
+import pers.mekomimi.bookvault.ui.screen.EmptyScreen
+import pers.mekomimi.bookvault.ui.screen.LoadingScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
             this,
             db
         )
-
         //选择扫描文件夹
         val picker = registerForActivityResult(
             ActivityResultContracts.OpenDocumentTree()
@@ -64,23 +63,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        picker.launch(null)
-
-        //启动文件扫描
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            val hasBooks = bookDao.count() > 0
-//            if (!hasBooks) {
-//                scanBooks(File("/storage/emulated/0/Download"), bookDao)
-//            }
-//        }
-
         val scanner = FolderScanner(this, db)
-        lifecycleScope.launch(Dispatchers.IO) {
-            val hasBooks = bookDao.count() > 0
-            if (!hasBooks) {
-                scanner.scanAllFolders()
-            }
-        }
+
 
         //UI设置
         setContent {
@@ -90,17 +74,36 @@ class MainActivity : ComponentActivity() {
             when {
                 books == null -> LoadingScreen()
 
-                books!!.isEmpty() -> EmptyScreen()
+                books!!.isEmpty() -> EmptyScreen(
+                    onfresh = {
+                        //扫描书籍文件
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            scanner.scanAllFolders()
+                        }
+                    },
+                    onAddFolder = {
+                        picker.launch(null)
+                    }
+                )
 
                 else -> ShelfScreen(
                     books = books!!,
-                    dao = bookDao,
+                    onRefresh = {
+                        //扫描书籍文件
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            scanner.scanAllFolders()
+                        }
+                    },
+                    onAddFolder = {
+                        picker.launch(null)
+                    },
                     context = context
                 )
             }
         }
     }
 
+    //注册按键事件
     var onVolumeDown: (() -> Unit)? = null
     var onVolumeUp: (() -> Unit)? = null
 
@@ -121,16 +124,6 @@ class MainActivity : ComponentActivity() {
 
         return super.onKeyDown(keyCode, event)
     }
-}
-
-@Composable
-fun EmptyScreen() {
-    Text("没有书籍")
-}
-
-@Composable
-fun LoadingScreen() {
-    Text("加载中")
 }
 
 
