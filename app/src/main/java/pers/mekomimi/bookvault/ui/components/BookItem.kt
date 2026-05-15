@@ -8,9 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import pers.mekomimi.bookvault.db.books.Book
-import java.io.File
 
 @Composable
 fun BookItem(
@@ -28,12 +27,7 @@ fun BookItem(
         )
 
         Button(onClick = {
-            val file = File(book.uri)
-            val uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.provider",
-                file
-            )
+            val uri = book.uri.toUri()
 
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "*/*")
