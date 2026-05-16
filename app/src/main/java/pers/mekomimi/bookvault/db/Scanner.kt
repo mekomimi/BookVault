@@ -1,16 +1,59 @@
-package pers.mekomimi.bookvault.db.folder
+package pers.mekomimi.bookvault.db
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import pers.mekomimi.bookvault.db.AppDatabase
-import pers.mekomimi.bookvault.db.books.Book
-import pers.mekomimi.bookvault.db.books.BookDao
+import pers.mekomimi.bookvault.db.book.Book
+import pers.mekomimi.bookvault.db.book.BookDao
+import pers.mekomimi.bookvault.db.folder.Folder
 
-class FolderScanner(
+class Scanner(
     private val context: Context,
     private val db: AppDatabase
 ) {
+
+    suspend fun addFolder(uri: Uri) {
+
+        context.contentResolver
+            .takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+
+        db.folderDao().insert(
+            Folder(
+                uri = uri.toString(),
+                lastScanTime = System.currentTimeMillis()
+            )
+        )
+    }
+
+    private fun scanFolder(uri: Uri) {
+
+        val root = DocumentFile.fromTreeUri(
+            context,
+            uri
+        ) ?: return
+
+        root.listFiles().forEach {
+
+            if (it.isDirectory) {
+                scanFolder(it.uri)
+            }
+
+            if (it.name?.endsWith(".epub") == true) {
+
+                Log.d(
+                    "BOOK",
+                    it.name ?: ""
+                )
+            }
+        }
+    }
+
     suspend fun scanAllFolders() {
 
         val folders = db.folderDao().getAll()
@@ -30,6 +73,13 @@ class FolderScanner(
         dir: DocumentFile,
         dao: BookDao
     ) {
+        val oldDir: Folder? =db.folderDao().findByUri(uri = dir.uri.toString())
+
+        if (oldDir!=null){
+            if (dir.lastModified() <= oldDir.lastScanTime) {
+                return
+            }
+        }
 
         val files = dir.listFiles()
 
@@ -67,7 +117,15 @@ class FolderScanner(
                     mtime = file.lastModified()
                 )
 
-                dao.insert(book)
+                //避免多次插入，减少IO
+                val old = dao.findByUri(file.uri.toString())
+                if (old == null) {
+                    // 新文件
+                    dao.insert(book)
+                } else if (old.mtime != file.lastModified()) {
+                    // 文件更新
+                    dao.insert(book.copy(id = old.id))
+                }
             }
         }
     }

@@ -14,6 +14,9 @@ interface FolderDao {
     @Query("SELECT * FROM Folder")
     suspend fun getAll(): List<Folder>
 
+    @Query("SELECT * FROM Folder WHERE uri = :uri LIMIT 1")
+    suspend fun findByUri(uri: String):Folder?
+
     @Delete
     suspend fun delete(folder: Folder)
 }

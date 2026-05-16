@@ -1,11 +1,11 @@
-package pers.mekomimi.bookvault.db.books
+package pers.mekomimi.bookvault.db.book
 
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "books",
+    tableName = "book",
     indices = [Index(value = ["uri"], unique = true)]
 )
 data class Book(

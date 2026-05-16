@@ -17,8 +17,7 @@ import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pers.mekomimi.bookvault.db.AppDatabase
-import pers.mekomimi.bookvault.db.folder.FolderManager
-import pers.mekomimi.bookvault.db.folder.FolderScanner
+import pers.mekomimi.bookvault.db.Scanner
 import pers.mekomimi.bookvault.ui.screen.ShelfScreen
 import android.view.KeyEvent
 import pers.mekomimi.bookvault.ui.screen.EmptyScreen
@@ -48,23 +47,20 @@ class MainActivity : ComponentActivity() {
         ).fallbackToDestructiveMigration().build()
         val bookDao = db.bookDao()
 
-        val folderManager = FolderManager(
+        //用于文件夹选择和文件扫描
+        val scanner = Scanner(
             this,
             db
         )
-        //选择扫描文件夹
         val picker = registerForActivityResult(
             ActivityResultContracts.OpenDocumentTree()
         ) { uri ->
             if (uri != null) {
                 lifecycleScope.launch {
-                    folderManager.addFolder(uri)
-                    //folderManager.scanAllFolders()
+                    scanner.addFolder(uri)
                 }
             }
         }
-        val scanner = FolderScanner(this, db)
-
 
         //UI设置
         setContent {

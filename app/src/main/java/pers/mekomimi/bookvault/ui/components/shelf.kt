@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
-import pers.mekomimi.bookvault.db.books.Book
+import pers.mekomimi.bookvault.db.book.Book
 
 @Composable
 fun ShelfGrid(
