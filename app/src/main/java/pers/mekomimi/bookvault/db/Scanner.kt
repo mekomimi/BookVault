@@ -3,7 +3,6 @@ package pers.mekomimi.bookvault.db
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import pers.mekomimi.bookvault.db.book.Book
@@ -15,7 +14,7 @@ class Scanner(
     private val db: AppDatabase
 ) {
 
-    suspend fun addFolder(uri: Uri) {
+    suspend fun selectFolder(uri: Uri) {
 
         context.contentResolver
             .takePersistableUriPermission(
@@ -25,36 +24,13 @@ class Scanner(
 
         db.folderDao().insert(
             Folder(
-                uri = uri.toString(),
-                lastScanTime = System.currentTimeMillis()
+                uri = uri.toString()
             )
         )
     }
 
-    private fun scanFolder(uri: Uri) {
-
-        val root = DocumentFile.fromTreeUri(
-            context,
-            uri
-        ) ?: return
-
-        root.listFiles().forEach {
-
-            if (it.isDirectory) {
-                scanFolder(it.uri)
-            }
-
-            if (it.name?.endsWith(".epub") == true) {
-
-                Log.d(
-                    "BOOK",
-                    it.name ?: ""
-                )
-            }
-        }
-    }
-
     suspend fun scanAllFolders() {
+        val oldBooks =db.bookDao().getAll().associateBy { it.uri }
 
         val folders = db.folderDao().getAll()
 
@@ -65,41 +41,25 @@ class Scanner(
                 folder.uri.toUri()
             ) ?: continue
 
-            scanDirectory(root, db.bookDao())
+            scanBooks(root, db.bookDao(), oldBooks=oldBooks)
         }
     }
 
-    private suspend fun scanDirectory(
+    private suspend fun scanBooks(
         dir: DocumentFile,
-        dao: BookDao
+        dao: BookDao,
+        oldBooks: Map<String, Book>
     ) {
-        val oldDir: Folder? =db.folderDao().findByUri(uri = dir.uri.toString())
-
-        if (oldDir!=null){
-            if (dir.lastModified() <= oldDir.lastScanTime) {
-                return
-            }
-        }
-
         val files = dir.listFiles()
 
-        println("扫描目录: ${dir.name}")
-        println("文件数量: ${files.size}")
-
         for (file in files) {
-
-            println("扫描到: ${file.uri}")
-
             // 递归目录
             if (file.isDirectory) {
 
-                scanDirectory(file, dao)
+                scanBooks(file, dao, oldBooks)
             }
-
             // 处理文件
             else if (file.isFile && isBook(file)) {
-
-                println("命中书籍: ${file.name}")
 
                 val book = Book(
 
@@ -118,13 +78,13 @@ class Scanner(
                 )
 
                 //避免多次插入，减少IO
-                val old = dao.findByUri(file.uri.toString())
-                if (old == null) {
+                val oldBook = oldBooks[book.uri]
+                if (oldBook == null) {
                     // 新文件
                     dao.insert(book)
-                } else if (old.mtime != file.lastModified()) {
-                    // 文件更新
-                    dao.insert(book.copy(id = old.id))
+                } else if (oldBook.mtime < file.lastModified()) {
+                    // 当老版本读取时间小于更新时间时，说明有新版本，文件更新
+                    dao.insert(book.copy(id = oldBook.id))
                 }
             }
         }

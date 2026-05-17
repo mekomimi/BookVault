@@ -57,14 +57,14 @@ class MainActivity : ComponentActivity() {
         ) { uri ->
             if (uri != null) {
                 lifecycleScope.launch {
-                    scanner.addFolder(uri)
+                    scanner.selectFolder(uri)
                 }
             }
         }
 
         //UI设置
         setContent {
-            val books by bookDao.getAll().collectAsState(initial = null)
+            val books by bookDao.observeAll().collectAsState(initial = null)
             val context = LocalContext.current
 
             when {

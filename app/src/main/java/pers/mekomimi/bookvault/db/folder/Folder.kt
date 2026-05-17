@@ -9,7 +9,5 @@ data class Folder(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val uri: String,
-
-    val lastScanTime: Long
+    val uri: String
 )

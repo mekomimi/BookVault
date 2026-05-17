@@ -14,7 +14,10 @@ interface BookDao {
     suspend fun insert(book: Book)
 
     @Query("SELECT * FROM book ORDER BY title ASC")
-    fun getAll(): Flow<List<Book>>
+    fun observeAll(): Flow<List<Book>>
+
+    @Query("SELECT * FROM book ORDER BY title ASC")
+    fun getAll(): List<Book>
 
     @Query("DELETE FROM book")
     suspend fun clear()

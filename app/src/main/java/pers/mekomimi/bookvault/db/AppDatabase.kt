@@ -12,7 +12,7 @@ import pers.mekomimi.bookvault.db.folder.Folder
         Book::class,
         Folder::class
                ],
-    version = 3
+    version = 4
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao

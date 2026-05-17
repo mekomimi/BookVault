@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "BookVault"
 include(":app")
- 
+include(":designsystem")
